@@ -871,3 +871,89 @@ ul {
         font-size: 1rem;
     }
 }
+
+/* PWA Install Prompt */
+.pwa-prompt {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.pwa-prompt.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.pwa-prompt-content {
+    background-color: white;
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    transform: translateY(20px);
+    transition: transform 0.3s;
+    margin: 20px;
+}
+
+.pwa-prompt.active .pwa-prompt-content {
+    transform: translateY(0);
+}
+
+.pwa-prompt-icon {
+    font-size: 3.5rem;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+.pwa-prompt-content h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.pwa-prompt-content p {
+    margin-bottom: 25px;
+    color: var(--dark-color);
+    line-height: 1.6;
+}
+
+.pwa-prompt-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.pwa-prompt-buttons .btn-primary,
+.pwa-prompt-buttons .btn-secondary {
+    padding: 12px 24px;
+    font-size: 1rem;
+}
+
+/* Responsive adjustments for PWA prompt */
+@media (max-width: 576px) {
+    .pwa-prompt-buttons {
+        flex-direction: column;
+    }
+    
+    .pwa-prompt-buttons .btn-primary,
+    .pwa-prompt-buttons .btn-secondary {
+        width: 100%;
+        margin: 5px 0;
+    }
+    
+    .pwa-prompt-content {
+        padding: 25px 20px;
+    }
+}
+

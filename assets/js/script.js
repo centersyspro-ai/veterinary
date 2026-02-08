@@ -21,6 +21,111 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+        // PWA Install Prompt
+    const pwaInstallPrompt = document.getElementById('pwa-install-prompt');
+    const installAppBtn = document.getElementById('install-app-btn');
+    const dismissInstallBtn = document.getElementById('dismiss-install-btn');
+    
+    // Variables for PWA installation
+    let deferredPrompt;
+    let installPromptShown = false;
+    
+    // Check if PWA is already installed
+    function isPWAInstalled() {
+        return window.matchMedia('(display-mode: standalone)').matches || 
+               window.navigator.standalone === true ||
+               document.referrer.includes('android-app://');
+    }
+    
+    // Show install prompt
+    function showInstallPrompt() {
+        // Don't show if already installed or if prompt was already shown
+        if (isPWAInstalled() || installPromptShown) return;
+        
+        // Show after a short delay
+        setTimeout(() => {
+            pwaInstallPrompt.classList.add('active');
+            installPromptShown = true;
+            
+            // Store in localStorage that prompt was shown
+            localStorage.setItem('pwaPromptShown', 'true');
+        }, 3000); // Show after 3 seconds
+    }
+    
+    // Listen for beforeinstallprompt event
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent the default prompt
+        e.preventDefault();
+        // Store the event for later use
+        deferredPrompt = e;
+        
+        // Show our custom prompt (only if not already installed)
+        if (!isPWAInstalled()) {
+            // Check if we've shown the prompt before
+            const promptShown = localStorage.getItem('pwaPromptShown');
+            if (!promptShown) {
+                showInstallPrompt();
+            }
+        }
+    });
+    
+    // Install button click handler
+    if (installAppBtn) {
+        installAppBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                alert('Your browser does not support PWA installation or the app is already installed.');
+                return;
+            }
+            
+            // Hide our prompt
+            pwaInstallPrompt.classList.remove('active');
+            
+            // Show the native installation prompt
+            deferredPrompt.prompt();
+            
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            // We've used the prompt, and can't use it again
+            deferredPrompt = null;
+            
+            if (outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+            } else {
+                console.log('User dismissed the install prompt');
+            }
+        });
+    }
+    
+    // Dismiss button click handler
+    if (dismissInstallBtn) {
+        dismissInstallBtn.addEventListener('click', () => {
+            pwaInstallPrompt.classList.remove('active');
+        });
+    }
+    
+    // Also close prompt when clicking outside the content
+    pwaInstallPrompt.addEventListener('click', (e) => {
+        if (e.target === pwaInstallPrompt) {
+            pwaInstallPrompt.classList.remove('active');
+        }
+    });
+    
+    // Check on page load if PWA is eligible for installation
+    // This handles cases where beforeinstallprompt might have fired before our listener was attached
+    window.addEventListener('load', () => {
+        // Check after a delay to ensure everything is loaded
+        setTimeout(() => {
+            if (deferredPrompt && !isPWAInstalled()) {
+                const promptShown = localStorage.getItem('pwaPromptShown');
+                if (!promptShown) {
+                    showInstallPrompt();
+                }
+            }
+        }, 2000);
+    });
+    
     
     // Gallery Carousel
     const galleryCarousel = document.getElementById('galleryCarousel');

@@ -1,12 +1,38 @@
 {
   "name": "Dash Veterinary Clinic",
   "short_name": "Dash Vet",
-  "description": "Professional veterinary care for your pets in Antioch, Tennessee",
+  "description": "Professional veterinary care for pets in Antioch, Tennessee. Services include wellness exams, surgery, dental care, and massage therapy.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2a7d5f",
+  "orientation": "portrait-primary",
   "icons": [
+    {
+      "src": "assets/images/logo.jpg",
+      "sizes": "72x72",
+      "type": "image/jpg"
+    },
+    {
+      "src": "assets/images/logo.jpg",
+      "sizes": "96x96",
+      "type": "image/jpg"
+    },
+    {
+      "src": "assets/images/logo.jpg",
+      "sizes": "128x128",
+      "type": "image/jpg"
+    },
+    {
+      "src": "assets/images/logo.jpg",
+      "sizes": "144x144",
+      "type": "image/jpg"
+    },
+    {
+      "src": "assets/images/logo.jpg",
+      "sizes": "152x152",
+      "type": "image/jpg"
+    },
     {
       "src": "assets/images/logo.jpg",
       "sizes": "192x192",
@@ -14,8 +40,18 @@
     },
     {
       "src": "assets/images/logo.jpg",
+      "sizes": "384x384",
+      "type": "image/jpg"
+    },
+    {
+      "src": "assets/images/logo.jpg",
       "sizes": "512x512",
       "type": "image/jpg"
     }
-  ]
+  ],
+  "categories": ["medical", "health", "pets"],
+  "lang": "en-US",
+  "dir": "ltr"
 }
+
+
