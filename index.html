@@ -12,6 +12,35 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="assets/images/logo.jpg" type="image/jpg">
+    
+
+    <style>
+        /* Estilos para el botón flotante de instalación (Estilo tipo Taccto) */
+.pwa-floating-btn {
+    position: fixed;
+    bottom: 90px; /* Posicionado arriba del botón de WhatsApp que suele estar a ~20px */
+    right: 20px;
+    background-color: #2a7d5f;
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: none; /* Se muestra solo mediante JS si la app es instalable */
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.3s ease;
+}
+.pwa-floating-btn:hover {
+    transform: scale(1.1);
+}
+    </style>
+
+
 </head>
 <body>
     <!-- WhatsApp Floating Button -->
@@ -401,5 +430,91 @@
         </div>
     </div>
     
+
+     <button id="pwa-floating-install" class="pwa-floating-btn" aria-label="Instalar Aplicación">
+        <i class="fas fa-download"></i>
+    </button>
+
+    <script src="assets/js/script.js"></script>
+    
+    <script>
+        // 1. Registro correcto del Service Worker apuntando a sw.js
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(registration => {
+                    console.log('ServiceWorker registrado con éxito');
+                }, err => {
+                    console.log('Fallo en el registro del ServiceWorker: ', err);
+                });
+            });
+        }
+
+        // 2. Lógica para interceptar la instalación automática y activar los botones manuales
+        let deferredPrompt;
+        const floatingInstallBtn = document.getElementById('pwa-floating-install');
+        const modalInstallPrompt = document.getElementById('pwa-install-prompt'); // Tu modal existente
+        const installAppBtn = document.getElementById('install-app-btn');
+        const dismissInstallBtn = document.getElementById('dismiss-install-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Previene que el navegador muestre el banner por defecto
+            e.preventDefault();
+            // Guarda el evento para usarlo más tarde
+            deferredPrompt = e;
+            
+            // Muestra el botón flotante estilo Taccto
+            if (floatingInstallBtn) floatingInstallBtn.style.display = 'flex';
+            // También puedes mostrar tu prompt/modal si lo deseas, o dejar que dependa del botón flotante
+            if (modalInstallPrompt) modalInstallPrompt.style.display = 'block';
+        });
+
+        // Manejador de click para el botón flotante
+        if (floatingInstallBtn) {
+            floatingInstallBtn.addEventListener('click', () => {
+                triggerPWAInstall();
+            });
+        }
+
+        // Manejador de click para el botón del modal
+        if (installAppBtn) {
+            installAppBtn.addEventListener('click', () => {
+                triggerPWAInstall();
+            });
+        }
+
+        // Función reutilizable para ejecutar la instalación
+        function triggerPWAInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('El usuario aceptó la instalación de la PWA');
+                    } else {
+                        console.log('El usuario rechazó la instalación');
+                    }
+                    deferredPrompt = null;
+                    // Oculta los elementos de instalación una vez decidido
+                    if (floatingInstallBtn) floatingInstallBtn.style.display = 'none';
+                    if (modalInstallPrompt) modalInstallPrompt.style.display = 'none';
+                });
+            }
+        }
+
+        // Cerrar el modal clásico si el usuario le da "Not Now"
+        if (dismissInstallBtn && modalInstallPrompt) {
+            dismissInstallBtn.addEventListener('click', () => {
+                modalInstallPrompt.style.display = 'none';
+            });
+        }
+
+        // Esconder botones si la app ya fue instalada
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA instalada correctamente');
+            if (floatingInstallBtn) floatingInstallBtn.style.display = 'none';
+            if (modalInstallPrompt) modalInstallPrompt.style.display = 'none';
+        });
+    </script>
+
+
 </body>
 </html>
