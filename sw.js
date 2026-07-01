@@ -1,43 +1,54 @@
-const CACHE_NAME = 'dash-vet-v3-cache';
-const assetsToCache = [
+const CACHE_NAME = 'veterinary-cache-v1';
+const ASSETS = [
   './',
   './index.html',
-  './manifest.json',
-  './assets/images/icon-192.png',
-  './assets/images/icon-512.png'
+  'https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap'
 ];
 
-// Instalación y almacenamiento en caché
-self.addEventListener('install', (event) => {
-  event.waitUntil(
+// Instalar y guardar en caché el entorno base
+self.addEventListener('install', (e) => {
+  e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(assetsToCache);
-    })
+      return cache.addAll(ASSETS);
+    }).then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
-// Activación y limpieza de cachés antiguas
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
+// Activar y limpiar versiones antiguas de cachés
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => {
       return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Intercepción de recursos (Estrategia: Network First con caída a Caché)
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
+// Estrategia de Red: Cache First con caída segura a Internet
+self.addEventListener('fetch', (e) => {
+  // Excluye llamadas externas que puedan interferir (como APIs, mapas o analíticas externas)
+  if (!e.request.url.startsWith(self.location.origin) && !e.request.url.includes('fonts.googleapis')) {
+    return;
+  }
+
+  e.respondWith(
+    caches.match(e.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(e.request).then((networkResponse) => {
+        return caches.open(CACHE_NAME).then((cache) => {
+          cache.put(e.request, networkResponse.clone());
+          return networkResponse;
+        });
+      });
+    }).catch(() => {
+      // Manejo silencioso en caso de pérdida total de conexión
     })
   );
 });
